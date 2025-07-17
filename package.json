@@ -1,0 +1,27 @@
+{
+  "name": "stability-mcp",
+  "version": "1.0.0",
+  "description": "Management Control Panel for STABILITY blockchain interaction",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "yarn workspaces foreach --all --topological --parallel run build",
+    "test": "yarn workspaces foreach -A run test",
+    "dev": "yarn workspace @stability-mcp/core dev",
+    "lint": "yarn workspaces foreach -A run lint",
+    "clean": "yarn workspaces foreach -A run clean"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.0.0",
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.3.0"
+  },
+  "packageManager": "yarn@4.5.1"
+}
