@@ -1,4 +1,24 @@
-import { WalletInfo } from '@stability-mcp/core';
+export interface WalletInfo {
+  address: string;
+  privateKey?: string;
+  mnemonic?: string;
+  balance?: string;
+}
+
+export interface TransactionDetails {
+  hash: string;
+  from: string;
+  to?: string;
+  value: string;
+  gasLimit: string;
+  gasPrice: string;
+  gasUsed?: string;
+  status?: number;
+  blockNumber?: number;
+  blockHash?: string;
+  timestamp?: number;
+  receipt?: any;
+}
 
 export interface StoredWallet extends WalletInfo {
   id: string;

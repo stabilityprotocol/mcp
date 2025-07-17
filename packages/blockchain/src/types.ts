@@ -1,6 +1,6 @@
 export interface BlockInfo {
   number: number;
-  hash: string;
+  hash: string | null;
   parentHash: string;
   timestamp: number;
   gasLimit: string;

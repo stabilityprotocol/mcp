@@ -1,15 +1,35 @@
-import { Wallet, HDNodeWallet, formatEther } from 'ethers';
-import { randomUUID } from 'crypto';
-import { WalletStorage } from './wallet-storage';
-import { StoredWallet, WalletCreationOptions, WalletImportOptions } from './types';
-import { StabilityProvider, WalletError, WalletInfo, TransactionDetails } from '@stability-mcp/core';
+import { Wallet, HDNodeWallet, formatEther } from "ethers";
+import { randomUUID } from "crypto";
+import { WalletStorage } from "./wallet-storage";
+import {
+  StoredWallet,
+  WalletCreationOptions,
+  WalletImportOptions,
+} from "./types";
+import { WalletError } from "./errors";
+import { WalletInfo, TransactionDetails } from "./types";
+
+interface Provider {
+  getBalance(address: string): Promise<string>;
+  getTransactionHistory(
+    address: string,
+    limit?: number
+  ): Promise<TransactionDetails[]>;
+  sendTransaction(wallet: any, transaction: any): Promise<any>;
+}
+
+export function isHDNodeWallet(
+  wallet: Wallet | HDNodeWallet
+): wallet is HDNodeWallet {
+  return "mnemonic" in wallet && wallet.mnemonic != null;
+}
 
 export class WalletManager {
   private storage: WalletStorage;
-  private provider: StabilityProvider;
+  private provider: Provider;
   private activeWallets: Map<string, Wallet> = new Map();
 
-  constructor(provider: StabilityProvider, storageDir?: string) {
+  constructor(provider: Provider, storageDir?: string) {
     this.provider = provider;
     this.storage = new WalletStorage(storageDir);
   }
@@ -21,22 +41,25 @@ export class WalletManager {
     try {
       const wallet = Wallet.createRandom();
       const id = randomUUID();
-      
+
       const storedWallet: StoredWallet = {
         id,
         address: wallet.address,
         privateKey: wallet.privateKey,
-        mnemonic: wallet.mnemonic?.phrase,
+        mnemonic:
+          "mnemonic" in wallet
+            ? (wallet as HDNodeWallet).mnemonic?.phrase
+            : undefined,
         name: options?.name || `Wallet ${id.slice(0, 8)}`,
         createdAt: new Date(),
-        encrypted: options?.encrypted || false
+        encrypted: options?.encrypted || false,
       };
 
       // Get initial balance
       storedWallet.balance = await this.provider.getBalance(wallet.address);
 
       await this.storage.saveWallet(storedWallet);
-      this.activeWallets.set(id, wallet);
+      this.activeWallets.set(id, wallet as unknown as Wallet);
 
       return storedWallet;
     } catch (error) {
@@ -49,33 +72,35 @@ export class WalletManager {
    */
   async importWallet(options: WalletImportOptions): Promise<StoredWallet> {
     try {
-      let wallet: Wallet;
+      let wallet: Wallet | HDNodeWallet;
 
       if (options.privateKey) {
         wallet = new Wallet(options.privateKey);
       } else if (options.mnemonic) {
-        wallet = Wallet.fromPhrase(options.mnemonic);
+        wallet = Wallet.fromPhrase(options.mnemonic) as unknown as Wallet;
       } else {
-        throw new WalletError('Either privateKey or mnemonic is required for import');
+        throw new WalletError(
+          "Either privateKey or mnemonic is required for import"
+        );
       }
 
       const id = randomUUID();
-      
+
       const storedWallet: StoredWallet = {
         id,
         address: wallet.address,
         privateKey: wallet.privateKey,
-        mnemonic: wallet.mnemonic?.phrase,
+        mnemonic: isHDNodeWallet(wallet) ? wallet.mnemonic?.phrase : undefined,
         name: options.name || `Imported Wallet ${id.slice(0, 8)}`,
         createdAt: new Date(),
-        encrypted: options.encrypted || false
+        encrypted: options.encrypted || false,
       };
 
       // Get initial balance
       storedWallet.balance = await this.provider.getBalance(wallet.address);
 
       await this.storage.saveWallet(storedWallet);
-      this.activeWallets.set(id, wallet);
+      this.activeWallets.set(id, wallet as unknown as Wallet);
 
       return storedWallet;
     } catch (error) {
@@ -96,7 +121,7 @@ export class WalletManager {
   async getEthersWallet(id: string): Promise<Wallet> {
     // Check if already loaded in memory
     if (this.activeWallets.has(id)) {
-      return this.activeWallets.get(id)!;
+      return this.activeWallets.get(id) as unknown as Wallet;
     }
 
     const storedWallet = await this.storage.getWallet(id);
@@ -109,7 +134,7 @@ export class WalletManager {
     }
 
     const wallet = new Wallet(storedWallet.privateKey);
-    this.activeWallets.set(id, wallet);
+    this.activeWallets.set(id, wallet as unknown as Wallet);
 
     // Update last used timestamp
     await this.storage.updateWallet(id, { lastUsed: new Date() });
@@ -122,28 +147,28 @@ export class WalletManager {
    */
   async listWallets(): Promise<WalletInfo[]> {
     const storedWallets = await this.storage.getAllWallets();
-    
+
     // Update balances for all wallets
     const walletInfos: WalletInfo[] = [];
-    
+
     for (const wallet of storedWallets) {
       try {
         const balance = await this.provider.getBalance(wallet.address);
         walletInfos.push({
           address: wallet.address,
           balance,
-          mnemonic: wallet.mnemonic
+          mnemonic: wallet.mnemonic,
         });
       } catch (error) {
         // If balance fetch fails, include wallet without balance
         walletInfos.push({
           address: wallet.address,
-          balance: '0',
-          mnemonic: wallet.mnemonic
+          balance: "0",
+          mnemonic: wallet.mnemonic,
         });
       }
     }
-    
+
     return walletInfos;
   }
 
@@ -154,7 +179,7 @@ export class WalletManager {
     try {
       // Remove from active wallets
       this.activeWallets.delete(id);
-      
+
       // Remove from storage
       return await this.storage.deleteWallet(id);
     } catch (error) {
@@ -172,17 +197,20 @@ export class WalletManager {
     }
 
     const balance = await this.provider.getBalance(wallet.address);
-    
+
     // Update stored balance
     await this.storage.updateWallet(id, { balance });
-    
+
     return balance;
   }
 
   /**
    * Get wallet transaction history
    */
-  async getWalletHistory(id: string, limit?: number): Promise<TransactionDetails[]> {
+  async getWalletHistory(
+    id: string,
+    limit?: number
+  ): Promise<TransactionDetails[]> {
     const wallet = await this.storage.getWallet(id);
     if (!wallet) {
       throw new WalletError(`Wallet not found: ${id}`);
@@ -197,11 +225,11 @@ export class WalletManager {
   async sendTransaction(id: string, to: string, value: string, data?: string) {
     try {
       const ethersWallet = await this.getEthersWallet(id);
-      
+
       const transaction = {
         to,
         value: value,
-        data: data || '0x'
+        data: data || "0x",
       };
 
       return await this.provider.sendTransaction(ethersWallet, transaction);
@@ -220,7 +248,10 @@ export class WalletManager {
   /**
    * Update wallet metadata
    */
-  async updateWallet(id: string, updates: Partial<StoredWallet>): Promise<void> {
+  async updateWallet(
+    id: string,
+    updates: Partial<StoredWallet>
+  ): Promise<void> {
     await this.storage.updateWallet(id, updates);
   }
 

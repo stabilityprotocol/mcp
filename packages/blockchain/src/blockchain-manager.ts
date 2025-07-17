@@ -1,6 +1,23 @@
-import { formatEther, formatUnits, parseEther } from 'ethers';
-import { StabilityProvider, BlockchainError, TransactionDetails } from '@stability-mcp/core';
-import { BlockInfo, NetworkStats, AddressInfo, TokenInfo, BlockchainAnalytics } from './types';
+import {
+  formatEther,
+  formatUnits,
+  parseEther,
+  Provider,
+  Transaction,
+  TransactionResponse,
+} from "ethers";
+import {
+  StabilityProvider,
+  BlockchainError,
+  TransactionDetails,
+} from "@stability-mcp/core";
+import {
+  BlockInfo,
+  NetworkStats,
+  AddressInfo,
+  TokenInfo,
+  BlockchainAnalytics,
+} from "./types";
 
 export class BlockchainManager {
   private provider: StabilityProvider;
@@ -14,12 +31,20 @@ export class BlockchainManager {
    */
   async getBlockInfo(blockNumber?: number): Promise<BlockInfo> {
     try {
-      const block = await this.provider.provider.getBlock(blockNumber || 'latest', true);
-      
+      const block = await this.provider.provider.getBlock(
+        blockNumber || "latest",
+        true
+      );
+
       if (!block) {
         throw new BlockchainError(`Block not found: ${blockNumber}`);
       }
 
+      if (block.hash == null) {
+        throw new BlockchainError(
+          `Block hash is null for block: ${blockNumber}`
+        );
+      }
       return {
         number: block.number,
         hash: block.hash,
@@ -28,7 +53,9 @@ export class BlockchainManager {
         gasLimit: block.gasLimit.toString(),
         gasUsed: block.gasUsed.toString(),
         miner: block.miner,
-        transactions: block.transactions.map(tx => typeof tx === 'string' ? tx : tx.hash)
+        transactions: block.transactions.map((tx) =>
+          typeof tx === "string" ? tx : (tx as TransactionResponse).hash
+        ),
       };
     } catch (error) {
       throw new BlockchainError(`Failed to get block info: ${error}`);
@@ -43,14 +70,14 @@ export class BlockchainManager {
       const [network, blockNumber, feeData] = await Promise.all([
         this.provider.provider.getNetwork(),
         this.provider.provider.getBlockNumber(),
-        this.provider.provider.getFeeData()
+        this.provider.provider.getFeeData(),
       ]);
 
       return {
         blockNumber,
-        gasPrice: feeData.gasPrice?.toString() || '0',
+        gasPrice: feeData.gasPrice?.toString() || "0",
         chainId: Number(network.chainId),
-        networkName: network.name
+        networkName: network.name,
       };
     } catch (error) {
       throw new BlockchainError(`Failed to get network stats: ${error}`);
@@ -65,17 +92,17 @@ export class BlockchainManager {
       const [balance, transactionCount, code] = await Promise.all([
         this.provider.provider.getBalance(address),
         this.provider.provider.getTransactionCount(address),
-        this.provider.provider.getCode(address)
+        this.provider.provider.getCode(address),
       ]);
 
-      const isContract = code !== '0x';
+      const isContract = code !== "0x";
 
       return {
         address,
         balance: formatEther(balance),
         transactionCount,
         isContract,
-        code: isContract ? code : undefined
+        code: isContract ? code : undefined,
       };
     } catch (error) {
       throw new BlockchainError(`Failed to get address info: ${error}`);
@@ -88,44 +115,58 @@ export class BlockchainManager {
   async getTokenInfo(tokenAddress: string): Promise<TokenInfo> {
     try {
       const code = await this.provider.provider.getCode(tokenAddress);
-      if (code === '0x') {
-        throw new BlockchainError(`No contract found at address: ${tokenAddress}`);
+      if (code === "0x") {
+        throw new BlockchainError(
+          `No contract found at address: ${tokenAddress}`
+        );
       }
 
       const tokenInfo: TokenInfo = {
-        address: tokenAddress
+        address: tokenAddress,
       };
 
       // Try to get standard ERC20 information
       try {
         const calls = [
-          { method: 'eth_call', params: [{ to: tokenAddress, data: '0x06fdde03' }, 'latest'] }, // name()
-          { method: 'eth_call', params: [{ to: tokenAddress, data: '0x95d89b41' }, 'latest'] }, // symbol()
-          { method: 'eth_call', params: [{ to: tokenAddress, data: '0x313ce567' }, 'latest'] }, // decimals()
-          { method: 'eth_call', params: [{ to: tokenAddress, data: '0x18160ddd' }, 'latest'] }  // totalSupply()
+          {
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: "0x06fdde03" }, "latest"],
+          }, // name()
+          {
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: "0x95d89b41" }, "latest"],
+          }, // symbol()
+          {
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: "0x313ce567" }, "latest"],
+          }, // decimals()
+          {
+            method: "eth_call",
+            params: [{ to: tokenAddress, data: "0x18160ddd" }, "latest"],
+          }, // totalSupply()
         ];
 
         const results = await Promise.allSettled(
-          calls.map(call => this.provider.query(call))
+          calls.map((call) => this.provider.query(call))
         );
 
         // Parse results if available
-        if (results[0].status === 'fulfilled' && results[0].value !== '0x') {
+        if (results[0].status === "fulfilled" && results[0].value !== "0x") {
           // Decode name (basic hex to string conversion)
           tokenInfo.name = this.decodeString(results[0].value);
         }
 
-        if (results[1].status === 'fulfilled' && results[1].value !== '0x') {
+        if (results[1].status === "fulfilled" && results[1].value !== "0x") {
           // Decode symbol
           tokenInfo.symbol = this.decodeString(results[1].value);
         }
 
-        if (results[2].status === 'fulfilled' && results[2].value !== '0x') {
+        if (results[2].status === "fulfilled" && results[2].value !== "0x") {
           // Decode decimals
           tokenInfo.decimals = parseInt(results[2].value, 16);
         }
 
-        if (results[3].status === 'fulfilled' && results[3].value !== '0x') {
+        if (results[3].status === "fulfilled" && results[3].value !== "0x") {
           // Decode total supply
           const totalSupplyHex = results[3].value;
           const decimals = tokenInfo.decimals || 18;
@@ -144,7 +185,10 @@ export class BlockchainManager {
   /**
    * Get blockchain analytics
    */
-  async getBlockchainAnalytics(fromBlock?: number, toBlock?: number): Promise<BlockchainAnalytics> {
+  async getBlockchainAnalytics(
+    fromBlock?: number,
+    toBlock?: number
+  ): Promise<BlockchainAnalytics> {
     try {
       const latestBlock = await this.provider.provider.getBlockNumber();
       const startBlock = fromBlock || Math.max(0, latestBlock - 100);
@@ -163,7 +207,7 @@ export class BlockchainManager {
           const block = await this.provider.provider.getBlock(i, true);
           if (block) {
             totalTransactions += block.transactions.length;
-            
+
             if (block.timestamp && blockTimes.length > 0) {
               const prevBlock = await this.provider.provider.getBlock(i - step);
               if (prevBlock) {
@@ -172,12 +216,12 @@ export class BlockchainManager {
             }
 
             // Count unique addresses
-            block.transactions.forEach(tx => {
-              if (typeof tx === 'object') {
-                addresses.add(tx.from);
-                if (tx.to) addresses.add(tx.to);
-              }
-            });
+            for (const tx of block.transactions) {
+              if (typeof tx === "string") continue;
+              const txResponse = tx as TransactionResponse;
+              if (txResponse.from) addresses.add(txResponse.from);
+              if (txResponse.to) addresses.add(txResponse.to);
+            }
           }
         } catch (blockError) {
           // Skip blocks that can't be retrieved
@@ -185,14 +229,15 @@ export class BlockchainManager {
         }
       }
 
-      const averageBlockTime = blockTimes.length > 0 
-        ? blockTimes.reduce((a, b) => a + b, 0) / blockTimes.length 
-        : 0;
+      const averageBlockTime =
+        blockTimes.length > 0
+          ? blockTimes.reduce((a, b) => a + b, 0) / blockTimes.length
+          : 0;
 
       return {
         totalTransactions,
         averageBlockTime,
-        activeAddresses: addresses.size
+        activeAddresses: addresses.size,
       };
     } catch (error) {
       throw new BlockchainError(`Failed to get blockchain analytics: ${error}`);
@@ -202,18 +247,24 @@ export class BlockchainManager {
   /**
    * Get gas price recommendations
    */
-  async getGasPriceRecommendations(): Promise<{ slow: string; standard: string; fast: string }> {
+  async getGasPriceRecommendations(): Promise<{
+    slow: string;
+    standard: string;
+    fast: string;
+  }> {
     try {
       const feeData = await this.provider.provider.getFeeData();
-      
+
       // For STABILITY blockchain, gas prices are 0
       return {
-        slow: '0',
-        standard: '0',
-        fast: '0'
+        slow: "0",
+        standard: "0",
+        fast: "0",
       };
     } catch (error) {
-      throw new BlockchainError(`Failed to get gas price recommendations: ${error}`);
+      throw new BlockchainError(
+        `Failed to get gas price recommendations: ${error}`
+      );
     }
   }
 
@@ -234,32 +285,43 @@ export class BlockchainManager {
       const toBlock = criteria.toBlock || latestBlock;
       const limit = criteria.limit || 50;
 
-      for (let blockNum = toBlock; blockNum >= fromBlock && transactions.length < limit; blockNum--) {
+      for (
+        let blockNum = toBlock;
+        blockNum >= fromBlock && transactions.length < limit;
+        blockNum--
+      ) {
         try {
           const block = await this.provider.provider.getBlock(blockNum, true);
           if (!block?.transactions) continue;
 
           for (const tx of block.transactions) {
-            if (typeof tx === 'object') {
-              let matches = true;
+            if (typeof tx === "string") continue;
+            const txResponse = tx as TransactionResponse;
+            let matches = true;
 
-              if (criteria.address) {
-                matches = matches && (
-                  tx.from.toLowerCase() === criteria.address.toLowerCase() ||
-                  tx.to?.toLowerCase() === criteria.address.toLowerCase()
-                );
-              }
+            if (criteria.address) {
+              matches =
+                matches &&
+                (txResponse.from.toLowerCase() ===
+                  criteria.address.toLowerCase() ||
+                  (txResponse.to !== null &&
+                    txResponse.to !== undefined &&
+                    txResponse.to.toLowerCase() ===
+                      criteria.address.toLowerCase()));
+            }
 
-              if (criteria.value) {
-                matches = matches && formatEther(tx.value) === criteria.value;
-              }
+            if (criteria.value) {
+              matches =
+                matches && formatEther(txResponse.value) === criteria.value;
+            }
 
-              if (matches) {
-                const txDetails = await this.provider.getTransactionDetails(tx.hash);
-                transactions.push(txDetails);
+            if (matches) {
+              const txDetails = await this.provider.getTransactionDetails(
+                txResponse.hash
+              );
+              transactions.push(txDetails);
 
-                if (transactions.length >= limit) break;
-              }
+              if (transactions.length >= limit) break;
             }
           }
         } catch (blockError) {
@@ -277,24 +339,41 @@ export class BlockchainManager {
   /**
    * Monitor address for new transactions
    */
-  async monitorAddress(address: string, callback: (tx: TransactionDetails) => void): Promise<void> {
+  async monitorAddress(
+    address: string,
+    callback: (tx: TransactionDetails) => void
+  ): Promise<void> {
     try {
       // Set up a simple polling mechanism
       let lastCheckedBlock = await this.provider.provider.getBlockNumber();
-      
+
       const checkForNewTransactions = async () => {
         try {
           const currentBlock = await this.provider.provider.getBlockNumber();
-          
+
           if (currentBlock > lastCheckedBlock) {
-            for (let blockNum = lastCheckedBlock + 1; blockNum <= currentBlock; blockNum++) {
-              const block = await this.provider.provider.getBlock(blockNum, true);
+            for (
+              let blockNum = lastCheckedBlock + 1;
+              blockNum <= currentBlock;
+              blockNum++
+            ) {
+              const block = await this.provider.provider.getBlock(
+                blockNum,
+                true
+              );
               if (block?.transactions) {
                 for (const tx of block.transactions) {
-                  if (typeof tx === 'object' && 
-                      (tx.from.toLowerCase() === address.toLowerCase() || 
-                       tx.to?.toLowerCase() === address.toLowerCase())) {
-                    const txDetails = await this.provider.getTransactionDetails(tx.hash);
+                  if (typeof tx === "string") continue;
+                  const txResponse = tx as TransactionResponse;
+                  if (
+                    txResponse.from.toLowerCase() === address.toLowerCase() ||
+                    (txResponse.to !== null &&
+                      txResponse.to !== undefined &&
+                      txResponse.to.toLowerCase() === address.toLowerCase())
+                  ) {
+                    const txDetails = await this.provider.getTransactionDetails(
+                      txResponse.hash
+                    );
                     callback(txDetails);
                   }
                 }
@@ -303,7 +382,7 @@ export class BlockchainManager {
             lastCheckedBlock = currentBlock;
           }
         } catch (error) {
-          console.error('Error monitoring address:', error);
+          console.error("Error monitoring address:", error);
         }
       };
 
@@ -320,22 +399,22 @@ export class BlockchainManager {
   private decodeString(hexData: string): string {
     try {
       // Remove 0x prefix
-      const hex = hexData.startsWith('0x') ? hexData.slice(2) : hexData;
-      
+      const hex = hexData.startsWith("0x") ? hexData.slice(2) : hexData;
+
       // Skip the first 64 characters (offset and length) and decode the string
       const stringHex = hex.slice(128);
-      let result = '';
-      
+      let result = "";
+
       for (let i = 0; i < stringHex.length; i += 2) {
         const byte = parseInt(stringHex.substr(i, 2), 16);
         if (byte !== 0) {
           result += String.fromCharCode(byte);
         }
       }
-      
+
       return result;
     } catch {
-      return 'Unknown';
+      return "Unknown";
     }
   }
 }
