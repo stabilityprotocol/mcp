@@ -5,8 +5,8 @@ WORKDIR /app
 
 # Copy application source code AFTER dependencies are installed
 # This creates /app/apps/* and /app/libs/*
-COPY libs ./libs
-COPY apps ./apps
+COPY ./libs ./libs
+COPY ./apps ./apps
 # Copy package files and Yarn configuration
 COPY package.json .yarnrc.yml yarn.lock tsconfig.json ./
 COPY .yarn ./.yarn
@@ -20,7 +20,7 @@ RUN corepack enable && \
 # Use --immutable to ensure consistency with the lockfile.
 RUN rm -rf .yarn/cache && yarn install
 
-# Build the application
+# Build the application 
 RUN yarn build
 
 # Expose port (adjust if needed)
