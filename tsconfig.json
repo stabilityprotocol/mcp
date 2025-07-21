@@ -11,28 +11,5 @@
     "declaration": true,
     "sourceMap": true,
     "baseUrl": "."
-  },
-  "references": [
-    {
-      "path": "./libs/types"
-    },
-    {
-      "path": "./libs/utils"
-    },
-    {
-      "path": "./apps/math"
-    },
-    {
-      "path": "./apps/wallet"
-    },
-    {
-      "path": "./apps/contracts"
-    },
-    {
-      "path": "./apps/blockchain"
-    },
-    {
-      "path": "./apps/server"
-    }
-  ]
+  }
 }

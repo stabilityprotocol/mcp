@@ -16,7 +16,6 @@
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@stability-mcp/blockchain": "workspace:*",
     "@stability-mcp/contracts": "workspace:*",
-    "@stability-mcp/math": "workspace:*",
     "@stability-mcp/types": "workspace:*",
     "@stability-mcp/utils": "workspace:*",
     "@stability-mcp/wallet": "workspace:*",

@@ -29,13 +29,6 @@ A comprehensive Management Control Panel (MCP) for interacting with the STABILIT
 - Write to smart contracts
 - Get latest block data
 
-### 🧮 Mathematical Operations
-
-- Basic arithmetic operations (add, subtract, multiply, divide)
-- Advanced functions (power, square root, factorial)
-- Percentage calculations
-- GCD and LCM operations
-
 ## Setup
 
 ### Prerequisites
@@ -79,7 +72,7 @@ STABILITY_API_KEY=your_api_key node dist/index.js
 The server will start and provide several endpoints:
 
 - **Health Check**: `GET /health`
-- **MCP Endpoints**: `/mcp/{toolset}` (wallet, contracts, blockchain, math)
+- **MCP Endpoints**: `/mcp/{toolset}` (wallet, contracts, blockchain)
 - **SSE Endpoints**: `/sse/{toolset}`
 - **REST API**: `/v1/tools/{toolset}`
 
@@ -109,12 +102,6 @@ The server will start and provide several endpoints:
 - `read_contract` - Read from smart contracts
 - `write_contract` - Write to smart contracts
 - `get_latest_block` - Get latest block info
-
-#### 4. Math Tools (`/mcp/math`)
-
-- `add`, `subtract`, `multiply`, `divide`
-- `power`, `sqrt`, `factorial`
-- `percentage`, `gcd`, `lcm`
 
 ### REST API Examples
 
@@ -187,7 +174,6 @@ curl -X POST http://localhost:3000/v1/tools/blockchain \
 ```
 stability-mcp/
 ├── apps/
-│   ├── math/          # Mathematical operations
 │   ├── wallet/        # Wallet management tools
 │   ├── contracts/     # Smart contract deployment
 │   ├── blockchain/    # Blockchain interaction tools

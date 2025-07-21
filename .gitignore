@@ -19,3 +19,4 @@ dist
 
 instructions
 .yarn/install-state.gz
+**/**/*.tsbuildinfo

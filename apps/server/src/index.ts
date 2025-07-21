@@ -11,13 +11,11 @@ import { z } from 'zod';
 import { IMCPTool } from '@stability-mcp/types';
 import { randomUUID } from 'node:crypto';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
-// import mathTools from '@stability-mcp/math';
 import walletTools from '@stability-mcp/wallet';
 import contractsTools from '@stability-mcp/contracts';
 import blockchainTools from '@stability-mcp/blockchain';
 
 const toolsEndpoints: Record<string, IMCPTool<any, any>[]> = {
-  // math: mathTools,
   wallet: walletTools,
   contracts: contractsTools,
   blockchain: blockchainTools,
