@@ -1,0 +1,13 @@
+.git
+npm-debug.log
+.coverage
+.coverage.*
+.env
+.aws
+node_modules
+build
+.yarn/cache
+dist
+dist/*
+apps/**/dist
+libs/**/dist

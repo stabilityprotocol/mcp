@@ -1,27 +1,28 @@
 {
   "name": "stability-mcp",
-  "version": "1.0.0",
-  "description": "Management Control Panel for STABILITY blockchain interaction",
+  "packageManager": "yarn@4.9.1",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "libs/*",
+    "apps/*"
   ],
   "scripts": {
+    "lint": "eslint '{apps,libs}/**/*.{ts,tsx}'",
+    "format": "prettier --write '{apps,libs}/**/*.{ts,tsx}'",
     "build": "yarn workspaces foreach --all --topological --parallel run build",
-    "test": "yarn workspaces foreach -A run test",
-    "dev": "yarn workspace @stability-mcp/core dev",
-    "lint": "yarn workspaces foreach -A run lint",
-    "clean": "yarn workspaces foreach -A run clean"
+    "inspect": "npx @modelcontextprotocol/inspector",
+    "start": "yarn workspace @stability-mcp/server run start",
+    "stdio": "yarn workspace @stability-mcp/server run stdio",
+    "stdio:wallet": "yarn workspace @stability-mcp/server run stdio:wallet",
+    "stdio:contracts": "yarn workspace @stability-mcp/server run stdio:contracts",
+    "stdio:blockchain": "yarn workspace @stability-mcp/server run stdio:blockchain"
   },
   "devDependencies": {
-    "@types/jest": "^29.0.0",
-    "@types/node": "^20.10.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "eslint": "^8.0.0",
-    "jest": "^29.0.0",
-    "ts-jest": "^29.0.0",
-    "typescript": "^5.3.0"
-  },
-  "packageManager": "yarn@4.5.1"
+    "@types/node": "^22.15.29",
+    "@typescript-eslint/eslint-plugin": "^8.33.1",
+    "@typescript-eslint/parser": "^8.33.1",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
 }

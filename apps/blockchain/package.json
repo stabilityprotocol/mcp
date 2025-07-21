@@ -1,0 +1,18 @@
+{
+    "name": "@stability-mcp/blockchain",
+    "version": "1.0.0",
+    "description": "MCP for blockchain interactions: read/write data, send transactions, query blockchain",
+    "main": "dist/index.js",
+    "type": "module",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js"
+    },
+    "dependencies": {
+        "@stability-mcp/types": "workspace:*",
+        "@stability-mcp/utils": "workspace:*",
+        "ethers": "^6.13.4",
+        "zod": "^3.25.49"
+    }
+}

@@ -1,345 +1,234 @@
 # STABILITY-MCP
 
-A comprehensive Management Control Panel (MCP) for interacting with the STABILITY blockchain. This application provides a complete toolkit for blockchain operations including wallet management, smart contract deployment, and transaction handling.
+A comprehensive Management Control Panel (MCP) for interacting with the STABILITY blockchain. This project provides tools for wallet management, smart contract deployment, and blockchain interactions.
 
-## 🌟 Features
+## Features
 
-### Wallet Management
-- **Create New Wallets**: Generate secure random wallets
-- **Import Existing Wallets**: Import from private key or mnemonic phrase
-- **Wallet Operations**: List, delete, and manage wallet metadata
-- **Balance Tracking**: Real-time balance monitoring
-- **Transaction History**: Complete transaction history for each wallet
+### 🔐 Wallet Management
 
-### Smart Contract Deployment
-- **Standard Contracts**: Deploy ERC20, ERC721, and ERC1155 contracts
-- **Custom Contracts**: Deploy user-provided smart contracts
-- **Contract Interaction**: Call contract functions and query contract state
-- **Contract Management**: Track and manage deployed contracts
+- Create new random wallets
+- Import existing wallets (private key or mnemonic)
+- Delete managed wallets
+- List all wallets
+- Get wallet balances
+- Retrieve transaction history
 
-### Blockchain Interaction
-- **Transaction Management**: Send transactions with proper STABILITY settings
-- **Block Information**: Query detailed block data
-- **Network Statistics**: Get real-time network stats
-- **Address Analysis**: Detailed address information and analytics
-- **Token Information**: Analyze token contracts and metadata
+### 📋 Smart Contract Deployment
 
-### STABILITY Blockchain Features
-- **Zero Gas Fees**: Automatically configured for STABILITY's zero-gas requirements
-- **Network Integration**: Seamless integration with STABILITY RPC endpoints
-- **Explorer Integration**: Links to STABILITY blockchain explorer
-- **API Key Management**: Secure handling of STABILITY API credentials
+- Deploy ERC20 tokens
+- Deploy ERC721 NFTs
+- Deploy ERC1155 multi-tokens
+- Deploy custom contracts with user-provided bytecode and ABI
 
-## 🏗️ Architecture
+### ⛓️ Blockchain Interactions
 
-This project uses a modular Yarn Workspace architecture:
+- Send transactions
+- Query transaction details
+- Get block information
+- Read from smart contracts
+- Write to smart contracts
+- Get latest block data
 
-```
-stability-mcp/
-├── packages/
-│   ├── core/           # Core functionality and configuration
-│   ├── wallet/         # Wallet management and storage
-│   ├── contracts/      # Smart contract deployment and interaction
-│   └── blockchain/     # Advanced blockchain operations
-├── examples/           # Usage examples
-└── docs/              # Additional documentation
-```
+### 🧮 Mathematical Operations
 
-## 🚀 Quick Start
+- Basic arithmetic operations (add, subtract, multiply, divide)
+- Advanced functions (power, square root, factorial)
+- Percentage calculations
+- GCD and LCM operations
+
+## Setup
 
 ### Prerequisites
 
-- Node.js (v18 or higher)
-- Yarn (v4.0.0 or higher)
-- STABILITY API Key from [portal.stabilityprotocol.com](https://portal.stabilityprotocol.com/)
+- Node.js 18+
+- Yarn package manager
+- STABILITY blockchain API key from [https://portal.stabilityprotocol.com/](https://portal.stabilityprotocol.com/)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd stability-mcp
-   ```
-
-2. **Install dependencies**
-   ```bash
-   yarn install
-   ```
-
-3. **Configure environment**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your STABILITY_API_KEY
-   ```
-
-4. **Build the project**
-   ```bash
-   yarn build
-   ```
-
-## 📖 Usage
-
-### Basic Setup
-
-```typescript
-import { StabilityMCP } from '@stability-mcp/core';
-
-// Initialize with API key
-const mcp = new StabilityMCP({
-  apiKey: 'your-stability-api-key'
-});
-
-// Initialize connection
-await mcp.initialize();
-```
-
-### Wallet Operations
-
-```typescript
-// Create a new wallet
-const wallet = await mcp.wallet.createWallet({
-  name: 'My Wallet'
-});
-
-// Import existing wallet
-const importedWallet = await mcp.wallet.importWallet({
-  privateKey: '0x...',
-  name: 'Imported Wallet'
-});
-
-// List all wallets
-const wallets = await mcp.wallet.listWallets();
-
-// Get wallet balance
-const balance = await mcp.wallet.getWalletBalance(wallet.id);
-
-// Send transaction
-const tx = await mcp.wallet.sendTransaction(
-  wallet.id,
-  '0xRecipientAddress',
-  '1.0' // Amount in ETH
-);
-```
-
-### Smart Contract Deployment
-
-```typescript
-// Deploy ERC20 token
-const erc20 = await mcp.contracts.deployContract({
-  walletId: wallet.id,
-  contractType: ContractType.ERC20,
-  name: 'MyToken',
-  symbol: 'MTK',
-  initialSupply: '1000000'
-}, mcp.wallet);
-
-// Deploy ERC721 NFT
-const erc721 = await mcp.contracts.deployContract({
-  walletId: wallet.id,
-  contractType: ContractType.ERC721,
-  name: 'MyNFT',
-  symbol: 'MNFT',
-  baseURI: 'https://api.example.com/metadata/'
-}, mcp.wallet);
-
-// Deploy custom contract
-const customContract = await mcp.contracts.deployContract({
-  walletId: wallet.id,
-  contractType: ContractType.CUSTOM,
-  customAbi: [...],
-  customBytecode: '0x...',
-  parameters: ['param1', 'param2']
-}, mcp.wallet);
-```
-
-### Contract Interaction
-
-```typescript
-// Call contract function
-const result = await mcp.contracts.callContractFunction({
-  contractAddress: erc20.address,
-  functionName: 'transfer',
-  parameters: ['0xRecipient', '100']
-}, wallet.id, mcp.wallet);
-
-// Query contract state
-const balance = await mcp.contracts.queryContract({
-  contractAddress: erc20.address,
-  functionName: 'balanceOf',
-  parameters: [wallet.address]
-});
-```
-
-### Blockchain Queries
-
-```typescript
-// Get block information
-const blockInfo = await mcp.blockchain.getBlockInfo();
-
-// Get network statistics
-const stats = await mcp.blockchain.getNetworkStats();
-
-// Get address information
-const addressInfo = await mcp.blockchain.getAddressInfo('0x...');
-
-// Get token information
-const tokenInfo = await mcp.blockchain.getTokenInfo('0x...');
-
-// Search transactions
-const transactions = await mcp.blockchain.searchTransactions({
-  address: '0x...',
-  limit: 10
-});
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `STABILITY_API_KEY` | Your STABILITY API key | ✅ | - |
-| `STABILITY_RPC_URL` | RPC endpoint URL | ❌ | `https://rpc.stabilityprotocol.com/zgt/{{API_KEY}}` |
-| `STABILITY_EXPLORER_URL` | Blockchain explorer URL | ❌ | `https://explorer.stabilityprotocol.com` |
-| `NETWORK_NAME` | Network name | ❌ | `STABILITY` |
-| `CHAIN_ID` | Chain ID | ❌ | `101010` |
-| `DEFAULT_GAS_LIMIT` | Default gas limit | ❌ | `21000` |
-
-### Programmatic Configuration
-
-```typescript
-const mcp = new StabilityMCP({
-  apiKey: 'your-api-key',
-  rpcUrl: 'https://custom-rpc.example.com',
-  explorerUrl: 'https://custom-explorer.example.com',
-  networkName: 'CustomNetwork',
-  chainId: 123456,
-  defaultGasLimit: 30000
-});
-```
-
-## 🧪 Testing
-
-Run tests for all packages:
+1. **Clone and install dependencies:**
 
 ```bash
-yarn test
+git clone <repository-url>
+cd stability-mcp
+yarn install
 ```
 
-Run tests for specific package:
+2. **Build the project:**
 
 ```bash
-yarn workspace @stability-mcp/core test
-yarn workspace @stability-mcp/wallet test
-yarn workspace @stability-mcp/contracts test
-yarn workspace @stability-mcp/blockchain test
+npx tsc --build
 ```
 
-Run tests with coverage:
+3. **Set environment variables:**
 
 ```bash
-yarn test --coverage
+export STABILITY_API_KEY=your_api_key_here
+export PORT=3000  # Optional, defaults to 3000
 ```
 
-## 🔨 Development
+## Usage
 
-### Build all packages
+### Starting the Server
 
 ```bash
-yarn build
+cd apps/server
+STABILITY_API_KEY=your_api_key node dist/index.js
 ```
 
-### Watch mode for development
+The server will start and provide several endpoints:
+
+- **Health Check**: `GET /health`
+- **MCP Endpoints**: `/mcp/{toolset}` (wallet, contracts, blockchain, math)
+- **SSE Endpoints**: `/sse/{toolset}`
+- **REST API**: `/v1/tools/{toolset}`
+
+### Available Tool Sets
+
+#### 1. Wallet Tools (`/mcp/wallet`)
+
+- `create_wallet` - Create a new random wallet
+- `import_wallet` - Import wallet via private key or mnemonic
+- `delete_wallet` - Remove wallet from management
+- `list_wallets` - List all managed wallets
+- `get_balance` - Get wallet balance
+- `get_transaction_history` - Get transaction history
+
+#### 2. Contract Tools (`/mcp/contracts`)
+
+- `deploy_erc20` - Deploy ERC20 token contract
+- `deploy_erc721` - Deploy ERC721 NFT contract
+- `deploy_erc1155` - Deploy ERC1155 multi-token contract
+- `deploy_custom_contract` - Deploy custom contract
+
+#### 3. Blockchain Tools (`/mcp/blockchain`)
+
+- `send_transaction` - Send transactions
+- `get_transaction` - Get transaction details
+- `get_block` - Get block information
+- `read_contract` - Read from smart contracts
+- `write_contract` - Write to smart contracts
+- `get_latest_block` - Get latest block info
+
+#### 4. Math Tools (`/mcp/math`)
+
+- `add`, `subtract`, `multiply`, `divide`
+- `power`, `sqrt`, `factorial`
+- `percentage`, `gcd`, `lcm`
+
+### REST API Examples
+
+#### Create a Wallet
 
 ```bash
-yarn dev
+curl -X POST http://localhost:3000/v1/tools/wallet \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool": "create_wallet",
+    "args": {
+      "alias": "MyWallet"
+    }
+  }'
 ```
 
-### Lint code
+#### Get Wallet Balance
 
 ```bash
-yarn lint
+curl -X POST http://localhost:3000/v1/tools/wallet \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool": "get_balance",
+    "args": {
+      "address": "0x..."
+    }
+  }'
 ```
 
-### Clean build artifacts
+#### Deploy ERC20 Token
 
 ```bash
-yarn clean
+curl -X POST http://localhost:3000/v1/tools/contracts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool": "deploy_erc20",
+    "args": {
+      "name": "MyToken",
+      "symbol": "MTK",
+      "initialSupply": "1000000",
+      "walletAddress": "0x...",
+      "privateKey": "0x..."
+    }
+  }'
 ```
 
-## 📦 Package Details
+#### Send Transaction
 
-### @stability-mcp/core
-Core functionality including configuration, provider, and base types.
+```bash
+curl -X POST http://localhost:3000/v1/tools/blockchain \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tool": "send_transaction",
+    "args": {
+      "to": "0x...",
+      "value": "0.1",
+      "privateKey": "0x..."
+    }
+  }'
+```
 
-**Key Components:**
-- `StabilityMCP`: Main application class
-- `StabilityConfig`: Configuration management
-- `StabilityProvider`: Blockchain provider abstraction
-- Error classes and type definitions
+## STABILITY Blockchain Configuration
 
-### @stability-mcp/wallet
-Wallet management and secure storage.
+- **RPC Endpoint**: `https://rpc.stabilityprotocol.com/zgt/{API_KEY}`
+- **Explorer**: [https://explorer.stabilityprotocol.com/](https://explorer.stabilityprotocol.com/)
+- **Gas Fees**: All transactions use zero gas fees (`maxFeePerGas: 0`, `maxPriorityFeePerGas: 0`)
 
-**Key Components:**
-- `WalletManager`: Wallet operations
-- `WalletStorage`: Persistent storage
-- Wallet creation, import, and management
+## Project Structure
 
-### @stability-mcp/contracts
-Smart contract deployment and interaction.
+```
+stability-mcp/
+├── apps/
+│   ├── math/          # Mathematical operations
+│   ├── wallet/        # Wallet management tools
+│   ├── contracts/     # Smart contract deployment
+│   ├── blockchain/    # Blockchain interaction tools
+│   └── server/        # MCP server application
+├── libs/
+│   ├── types/         # Shared TypeScript types
+│   └── utils/         # Shared utilities (logging, env)
+└── instructions/      # Project specifications
+```
 
-**Key Components:**
-- `ContractManager`: Contract operations
-- `ContractTemplates`: Pre-built contract templates
-- Support for ERC20, ERC721, ERC1155, and custom contracts
+## Development
 
-### @stability-mcp/blockchain
-Advanced blockchain operations and analytics.
+### Building Individual Packages
 
-**Key Components:**
-- `BlockchainManager`: Blockchain queries and analytics
-- Block and transaction analysis
-- Network statistics and monitoring
+```bash
+# Build all packages
+npx tsc --build
 
-## 🚨 Security Considerations
+# Build specific package
+cd apps/wallet && npx tsc
+```
 
-- **Private Keys**: Stored locally in encrypted format
-- **API Keys**: Securely managed through environment variables
-- **Network Security**: All RPC calls use HTTPS
-- **Input Validation**: Comprehensive validation of user inputs
-- **Error Handling**: Graceful error handling without exposing sensitive data
+### Running Tests
 
-## 🤝 Contributing
+```bash
+yarn test  # When tests are implemented
+```
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes
-4. Add tests for new functionality
-5. Run tests: `yarn test`
-6. Commit your changes: `git commit -am 'Add new feature'`
-7. Push to the branch: `git push origin feature-name`
-8. Submit a pull request
+### Adding New Tools
 
-## 📄 License
+1. Create new tool in appropriate app directory
+2. Follow the `IMCPTool` interface pattern
+3. Export tool in the app's `index.ts`
+4. Add app to server's `toolsEndpoints`
 
-MIT License - see [LICENSE](LICENSE) file for details.
+## Security Notes
 
-## 🔗 Links
+- ⚠️ **Private keys are stored in memory** - Use secure storage in production
+- ⚠️ **API keys should be kept secure** - Never commit them to version control
+- ⚠️ **Transaction validation** - Always verify transaction details before signing
 
-- [STABILITY Protocol](https://stabilityprotocol.com/)
-- [STABILITY Portal](https://portal.stabilityprotocol.com/)
-- [STABILITY Explorer](https://explorer.stabilityprotocol.com/)
-- [STABILITY Documentation](https://docs.stabilityprotocol.com/)
+## License
 
-## 📞 Support
-
-For support and questions:
-
-- Create an issue in this repository
-- Check the [STABILITY Documentation](https://docs.stabilityprotocol.com/)
-- Visit the [STABILITY Discord](https://discord.gg/stability)
-
----
-
-**Note**: This application is designed specifically for the STABILITY blockchain. Make sure you have a valid API key from the STABILITY Portal before using this application.
+MIT License - see LICENSE file for details.

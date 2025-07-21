@@ -1,0 +1,17 @@
+{
+  "name": "@stability-mcp/math",
+  "version": "1.0.0",
+  "description": "MCP for basic mathematical operations: add, subtract, multiply, divide, power, sqrt, etc.",
+  "main": "dist/index.js",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@stability-mcp/types": "workspace:*",
+    "@stability-mcp/utils": "workspace:*",
+    "zod": "^3.25.49"
+  }
+}

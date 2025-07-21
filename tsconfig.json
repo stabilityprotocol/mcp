@@ -1,21 +1,38 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "commonjs",
-    "lib": [
-      "ES2022"
-    ],
-    "strict": true,
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "outDir": "./dist",
     "declaration": true,
-    "declarationMap": true,
     "sourceMap": true,
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+    "baseUrl": "."
+  },
+  "references": [
+    {
+      "path": "./libs/types"
+    },
+    {
+      "path": "./libs/utils"
+    },
+    {
+      "path": "./apps/math"
+    },
+    {
+      "path": "./apps/wallet"
+    },
+    {
+      "path": "./apps/contracts"
+    },
+    {
+      "path": "./apps/blockchain"
+    },
+    {
+      "path": "./apps/server"
+    }
+  ]
 }
