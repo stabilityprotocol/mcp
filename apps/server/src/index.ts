@@ -388,7 +388,7 @@ app.get('/health', (_, res) => {
 });
 
 app.all('/', (req, res) => {
-  res.status(301).redirect('https://docs.stabilityprotocol.com');
+  res.status(301).redirect('https://github.com/stabilityprotocol/mcp');
 });
 
 // STDIO server function
