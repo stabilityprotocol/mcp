@@ -234,7 +234,6 @@ yarn test  # When tests are implemented
 
 ## Security Notes
 
-- ⚠️ **Private keys are stored in memory** - Use secure storage in production
 - ⚠️ **API keys should be kept secure** - Never commit them to version control
 - ⚠️ **Transaction validation** - Always verify transaction details before signing
 
