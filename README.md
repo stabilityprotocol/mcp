@@ -1,6 +1,6 @@
 # STABILITY-MCP
 
-A comprehensive Management Control Panel (MCP) for interacting with the STABILITY blockchain. This project provides tools for wallet management, smart contract deployment, and blockchain interactions.
+A comprehensive Model Context Protocol (MCP) for interacting with the STABILITY blockchain. This project provides tools for wallet management, smart contract deployment, and blockchain interactions.
 
 PRODUCTION URL: https://mcp.stabilityprotocol.com
 
