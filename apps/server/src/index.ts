@@ -387,6 +387,10 @@ app.get('/health', (_, res) => {
   res.send('OK');
 });
 
+app.all('*', (req, res) => {
+  res.status(301).redirect('https://docs.stabilityprotocol.com');
+});
+
 // STDIO server function
 async function startStdioServer(toolsToUse?: string) {
   let tools = allTools;
