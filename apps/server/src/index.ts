@@ -135,7 +135,11 @@ Object.entries(allEndpoints).forEach(([endpoint, tools]) => {
           },
         });
 
+        let isClosing = false;
         transport.onclose = () => {
+          if (isClosing) return;
+          isClosing = true;
+
           const sid = transport?.sessionId;
           if (sid && transports[`${endpoint}-${sid}`]) {
             logger.info({
@@ -144,7 +148,13 @@ Object.entries(allEndpoints).forEach(([endpoint, tools]) => {
             });
             delete transports[`${endpoint}-${sid}`];
           }
-          server.close();
+
+          // Avoid circular dependency - only close server if not already closing
+          try {
+            server.close();
+          } catch (error) {
+            // Ignore errors if server is already closed
+          }
         };
         await server.connect(transport);
         logger.info({
@@ -230,14 +240,28 @@ Object.entries(allEndpoints).forEach(([endpoint, tools]) => {
     const sessionKey = `${endpoint}-${transport.sessionId}`;
     transports[sessionKey] = transport;
 
+    let sseIsClosing = false;
     res.on('close', () => {
+      if (sseIsClosing) return;
+      sseIsClosing = true;
+
       logger.info({
         endpoint: ssePath,
         message: `SSE connection closed for session ${transport.sessionId}`,
       });
       delete transports[sessionKey];
-      transport.close();
-      server.close();
+
+      try {
+        transport.close();
+      } catch (error) {
+        // Ignore errors if transport is already closed
+      }
+
+      try {
+        server.close();
+      } catch (error) {
+        // Ignore errors if server is already closed
+      }
     });
 
     try {
@@ -338,7 +362,9 @@ Object.entries(allEndpoints).forEach(([endpoint, tools]) => {
       }
 
       // Extract API key from header and inject into args if needed
-      const apiKeyFromHeader = req.headers['x-api-key'] as string;
+      const apiKeyFromHeader =
+        (req.headers['x-api-key'] as string) ||
+        (req.query['api-key'] as string);
       let processedArgs = { ...args };
 
       // If tool needs apiKey and it's not provided in args, inject from header

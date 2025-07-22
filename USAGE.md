@@ -57,7 +57,7 @@ This document explains how to use the Stability Model Context Protocol (MCP) for
 ### REST API (HTTP Requests)
 
 - Make POST requests to endpoints like `/v1/tools/{toolset}` where toolset is `wallet`, `contracts`, or `blockchain`.
-- **Authentication**: Provide STABILITY API key via `X-API-Key` header or as a parameter for blockchain tools.
+- **Authentication**: Provide STABILITY API key via `X-API-Key` header, or as a query parameter `?api-key=your_api_key_here`, or as a parameter for blockchain tools.
 - **Example: Create Wallet**
   ```
   curl -X POST https://mcp.stabilityprotocol.com/v1/tools/wallet \
