@@ -6,7 +6,7 @@ PRODUCTION URL: https://mcp.stabilityprotocol.com
 
 For detailed usage instructions including SSE, HTTP Streaming, STDIO modes, and API examples, see [USAGE.md](USAGE.md).
 
-[![Add to Cursor](https://camo.githubusercontent.com/07693c66afde8c9e20f2a324fdabd5064da6dc50f8482cca2d9290e7ad7c3204/68747470733a2f2f637572736f722e636f6d2f646565706c696e6b2f6d63702d696e7374616c6c2d6461726b2e737667)](https://cursor.com/install-mcp?name=stabilityprotocol&config=eyJ1cmwiOiJodHRwczovL21jcC5zdGFiaWxpdHlwcm90b2NvbC5jb20vbWNwIn0)
+[![Add to Cursor](https://camo.githubusercontent.com/07693c66afde8c9e20f2a324fdabd5064da6dc50f8482cca2d9290e7ad7c3204/68747470733a2f2f637572736f722e636f6d2f646565706c696e6b2f6d63702d696e7374616c6c2d6461726b2e737667)](https://cursor.com/install-mcp?name=stabilityprotocol&config=eyJ1cmwiOiJodHRwczovL21jcC5zdGFiaWxpdHlwcm90b2NvbC5jb20vc3NlIn0=)
 
 ## Features
 

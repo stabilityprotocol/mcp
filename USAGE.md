@@ -4,7 +4,7 @@ This document explains how to use the Stability Model Context Protocol (MCP) for
 
 ## Add to Cursor
 
-[![Add to Cursor](https://camo.githubusercontent.com/07693c66afde8c9e20f2a324fdabd5064da6dc50f8482cca2d9290e7ad7c3204/68747470733a2f2f637572736f722e636f6d2f646565706c696e6b2f6d63702d696e7374616c6c2d6461726b2e737667)](https://cursor.com/install-mcp?name=stabilityprotocol&config=eyJ1cmwiOiJodHRwczovL21jcC5zdGFiaWxpdHlwcm90b2NvbC5jb20vbWNwIn0)
+[![Add to Cursor](https://camo.githubusercontent.com/07693c66afde8c9e20f2a324fdabd5064da6dc50f8482cca2d9290e7ad7c3204/68747470733a2f2f637572736f722e636f6d2f646565706c696e6b2f6d63702d696e7374616c6c2d6461726b2e737667)](https://cursor.com/install-mcp?name=stabilityprotocol&config=eyJ1cmwiOiJodHRwczovL21jcC5zdGFiaWxpdHlwcm90b2NvbC5jb20vc3NlIn0=)
 
 - Click the button above to add Stability MCP to your Cursor IDE
 - Alternatively, manually add the MCP server URL: `https://mcp.stabilityprotocol.com/mcp`
@@ -14,7 +14,7 @@ This document explains how to use the Stability Model Context Protocol (MCP) for
 {
   "mcpServers": {
     "stabilityprotocol": {
-      "url": "https://mcp.stabilityprotocol.com/mcp"
+      "url": "https://mcp.stabilityprotocol.com/sse"
     }
   }
 }
