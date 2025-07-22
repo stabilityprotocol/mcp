@@ -4,6 +4,10 @@ A comprehensive Management Control Panel (MCP) for interacting with the STABILIT
 
 PRODUCTION URL: https://mcp.stabilityprotocol.com
 
+For detailed usage instructions including SSE, HTTP Streaming, STDIO modes, and API examples, see [USAGE.md](USAGE.md).
+
+[![Add to Cursor](https://camo.githubusercontent.com/07693c66afde8c9e20f2a324fdabd5064da6dc50f8482cca2d9290e7ad7c3204/68747470733a2f2f637572736f722e636f6d2f646565706c696e6b2f6d63702d696e7374616c6c2d6461726b2e737667)](https://cursor.com/install-mcp?name=stabilityprotocol&config=eyJ1cmwiOiJodHRwczovL21jcC5zdGFiaWxpdHlwcm90b2NvbC5jb20vbWNwIn0)
+
 ## Features
 
 ### 🔐 Wallet Management
@@ -55,17 +59,14 @@ npx tsc --build
 3. **Set environment variables:**
 
 ```bash
-export STABILITY_API_KEY=your_api_key_here
 export PORT=3000  # Optional, defaults to 3000
 ```
-
-## Usage
 
 ### Starting the Server
 
 ```bash
 cd apps/server
-STABILITY_API_KEY=your_api_key node dist/index.js
+node dist/index.js
 ```
 
 The server will start and provide several endpoints:
@@ -79,19 +80,13 @@ The server will start and provide several endpoints:
 
 The STABILITY API key can be provided in multiple ways:
 
-1. **Environment Variable** (recommended for wallet/contracts tools):
-
-   ```bash
-   export STABILITY_API_KEY=your_api_key_here
-   ```
-
-2. **HTTP Header** (for REST API calls):
+1. **HTTP Header** (for REST API calls):
 
    ```bash
    -H "X-API-Key: your_stability_api_key_here"
    ```
 
-3. **Parameter in tool arguments** (required for blockchain tools):
+2. **Parameter in tool arguments** (required for blockchain tools):
    ```json
    {
      "tool": "send_transaction",
