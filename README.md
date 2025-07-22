@@ -76,6 +76,33 @@ The server will start and provide several endpoints:
 - **SSE Endpoints**: `/sse/{toolset}`
 - **REST API**: `/v1/tools/{toolset}`
 
+### API Key Configuration
+
+The STABILITY API key can be provided in multiple ways:
+
+1. **Environment Variable** (recommended for wallet/contracts tools):
+
+   ```bash
+   export STABILITY_API_KEY=your_api_key_here
+   ```
+
+2. **HTTP Header** (for REST API calls):
+
+   ```bash
+   -H "X-API-Key: your_stability_api_key_here"
+   ```
+
+3. **Parameter in tool arguments** (required for blockchain tools):
+   ```json
+   {
+     "tool": "send_transaction",
+     "args": {
+       "apiKey": "your_stability_api_key_here",
+       ...
+     }
+   }
+   ```
+
 ### Available Tool Sets
 
 #### 1. Wallet Tools (`/mcp/wallet`)
@@ -110,6 +137,7 @@ The server will start and provide several endpoints:
 ```bash
 curl -X POST http://localhost:3000/v1/tools/wallet \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: your_stability_api_key_here" \
   -d '{
     "tool": "create_wallet",
     "args": {
@@ -123,6 +151,7 @@ curl -X POST http://localhost:3000/v1/tools/wallet \
 ```bash
 curl -X POST http://localhost:3000/v1/tools/wallet \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: your_stability_api_key_here" \
   -d '{
     "tool": "get_balance",
     "args": {
@@ -136,6 +165,7 @@ curl -X POST http://localhost:3000/v1/tools/wallet \
 ```bash
 curl -X POST http://localhost:3000/v1/tools/contracts \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: your_stability_api_key_here" \
   -d '{
     "tool": "deploy_erc20",
     "args": {
@@ -153,12 +183,14 @@ curl -X POST http://localhost:3000/v1/tools/contracts \
 ```bash
 curl -X POST http://localhost:3000/v1/tools/blockchain \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: your_stability_api_key_here" \
   -d '{
     "tool": "send_transaction",
     "args": {
       "to": "0x...",
       "value": "0.1",
-      "privateKey": "0x..."
+      "privateKey": "0x...",
+      "apiKey": "your_stability_api_key_here"
     }
   }'
 ```

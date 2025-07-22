@@ -7,6 +7,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import express, { Request, Response } from 'express';
 import { logger, env } from '@stability-mcp/utils';
 import morgan from 'morgan';
+import cors from 'cors';
 import { z } from 'zod';
 import { IMCPTool } from '@stability-mcp/types';
 import { randomUUID } from 'node:crypto';
@@ -70,6 +71,7 @@ const getMcpServer = (tools: IMCPTool<any, any>[]) => {
 const app = express();
 app.use(morgan('combined'));
 app.use(express.json());
+app.use(cors());
 
 const transports: Record<
   string,
@@ -334,9 +336,24 @@ Object.entries(allEndpoints).forEach(([endpoint, tools]) => {
         });
         return;
       }
+
+      // Extract API key from header and inject into args if needed
+      const apiKeyFromHeader = req.headers['x-api-key'] as string;
+      let processedArgs = { ...args };
+
+      // If tool needs apiKey and it's not provided in args, inject from header
+      if (toolInstance.inputSchema && apiKeyFromHeader) {
+        const schemaShape =
+          toolInstance.inputSchema.shape ||
+          toolInstance.inputSchema._def?.shape;
+        if (schemaShape && schemaShape.apiKey && !args.apiKey) {
+          processedArgs.apiKey = apiKeyFromHeader;
+        }
+      }
+
       const inputSchema = toolInstance.inputSchema;
       if (inputSchema) {
-        const parsedArgs = inputSchema.safeParse(args);
+        const parsedArgs = inputSchema.safeParse(processedArgs);
         if (!parsedArgs.success) {
           res.status(400).json({
             reason: parsedArgs.error.message,
@@ -344,8 +361,10 @@ Object.entries(allEndpoints).forEach(([endpoint, tools]) => {
           });
           return;
         }
+        processedArgs = parsedArgs.data;
       }
-      const result = await toolInstance.handler(args);
+
+      const result = await toolInstance.handler(processedArgs);
       if (result.structuredContent) {
         res.json(result.structuredContent);
       } else {

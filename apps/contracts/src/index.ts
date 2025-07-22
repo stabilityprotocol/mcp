@@ -3,9 +3,9 @@ import { ethers } from 'ethers';
 import { IMCPTool, ReturnTypeStructuredContent } from '@stability-mcp/types';
 import { env } from '@stability-mcp/utils';
 
-const getProvider = () => {
-  const apiKey = env('STABILITY_API_KEY');
-  const rpcUrl = `https://rpc.stabilityprotocol.com/zgt/${apiKey}`;
+const getProvider = (apiKey?: string) => {
+  const key = apiKey || env('STABILITY_API_KEY');
+  const rpcUrl = `https://rpc.stabilityprotocol.com/zgt/${key}`;
   return new ethers.JsonRpcProvider(rpcUrl);
 };
 
@@ -56,6 +56,10 @@ export const deployERC20Schema = z.object({
     .string()
     .describe('Initial supply in tokens (will be converted to wei)'),
   privateKey: z.string().describe('Private key of the deploying wallet'),
+  apiKey: z
+    .string()
+    .optional()
+    .describe('STABILITY API Key (optional if set as environment variable)'),
 });
 
 export const deployERC20Tool: IMCPTool<
@@ -66,8 +70,8 @@ export const deployERC20Tool: IMCPTool<
   description: 'Deploy an ERC20 token contract',
   inputSchema: deployERC20Schema,
   handler: async (args) => {
-    const { name, symbol, initialSupply, privateKey } = args;
-    const provider = getProvider();
+    const { name, symbol, initialSupply, privateKey, apiKey } = args;
+    const provider = getProvider(apiKey);
 
     const wallet = new ethers.Wallet(privateKey, provider);
 
@@ -131,6 +135,10 @@ export const deployERC721Schema = z.object({
   name: z.string().describe('NFT collection name'),
   symbol: z.string().describe('NFT collection symbol'),
   privateKey: z.string().describe('Private key of the deploying wallet'),
+  apiKey: z
+    .string()
+    .optional()
+    .describe('STABILITY API Key (optional if set as environment variable)'),
 });
 
 export const deployERC721Tool: IMCPTool<
@@ -141,8 +149,8 @@ export const deployERC721Tool: IMCPTool<
   description: 'Deploy an ERC721 NFT contract',
   inputSchema: deployERC721Schema,
   handler: async (args) => {
-    const { name, symbol, privateKey } = args;
-    const provider = getProvider();
+    const { name, symbol, privateKey, apiKey } = args;
+    const provider = getProvider(apiKey);
 
     const wallet = new ethers.Wallet(privateKey, provider);
 
@@ -194,6 +202,10 @@ export const deployERC721Tool: IMCPTool<
 export const deployERC1155Schema = z.object({
   uri: z.string().describe('Base URI for token metadata'),
   privateKey: z.string().describe('Private key of the deploying wallet'),
+  apiKey: z
+    .string()
+    .optional()
+    .describe('STABILITY API Key (optional if set as environment variable)'),
 });
 
 export const deployERC1155Tool: IMCPTool<
@@ -204,8 +216,8 @@ export const deployERC1155Tool: IMCPTool<
   description: 'Deploy an ERC1155 multi-token contract',
   inputSchema: deployERC1155Schema,
   handler: async (args) => {
-    const { uri, privateKey } = args;
-    const provider = getProvider();
+    const { uri, privateKey, apiKey } = args;
+    const provider = getProvider(apiKey);
 
     const wallet = new ethers.Wallet(privateKey, provider);
 
@@ -262,6 +274,10 @@ export const deployCustomContractSchema = z.object({
     .describe('Constructor arguments'),
   walletAddress: z.string().describe('Wallet address to deploy from'),
   privateKey: z.string().describe('Private key of the deploying wallet'),
+  apiKey: z
+    .string()
+    .optional()
+    .describe('STABILITY API Key (optional if set as environment variable)'),
 });
 
 export const deployCustomContractTool: IMCPTool<
@@ -278,8 +294,9 @@ export const deployCustomContractTool: IMCPTool<
       constructorArgs = [],
       walletAddress,
       privateKey,
+      apiKey,
     } = args;
-    const provider = getProvider();
+    const provider = getProvider(apiKey);
 
     const wallet = new ethers.Wallet(privateKey, provider);
 
