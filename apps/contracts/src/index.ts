@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { ethers } from 'ethers';
 import { IMCPTool, ReturnTypeStructuredContent } from '@stability-mcp/types';
-import { env } from '@stability-mcp/utils';
 import ContractCompiler from './compiler.js';
 
 const getProvider = (apiKey: string) => {
@@ -268,7 +267,6 @@ export const deployCustomContractSchema = z.object({
     .array(z.any())
     .optional()
     .describe('Constructor arguments'),
-  walletAddress: z.string().describe('Wallet address to deploy from'),
   privateKey: z.string().describe('Private key of the deploying wallet'),
   apiKey: z
     .string()
@@ -285,14 +283,7 @@ export const deployCustomContractTool: IMCPTool<
   description: 'Deploy a custom smart contract',
   inputSchema: deployCustomContractSchema,
   handler: async (args) => {
-    const {
-      bytecode,
-      abi,
-      constructorArgs = [],
-      walletAddress,
-      privateKey,
-      apiKey,
-    } = args;
+    const { bytecode, abi, constructorArgs = [], privateKey, apiKey } = args;
     const provider = getProvider(apiKey);
 
     const wallet = new ethers.Wallet(privateKey, provider);
@@ -314,7 +305,7 @@ export const deployCustomContractTool: IMCPTool<
           text: JSON.stringify({
             contractAddress,
             transactionHash: deployTx.deploymentTransaction()?.hash,
-            deployer: walletAddress,
+            deployer: wallet.address,
             constructorArgs,
           }),
         },
@@ -322,7 +313,7 @@ export const deployCustomContractTool: IMCPTool<
       structuredContent: {
         contractAddress,
         transactionHash: deployTx.deploymentTransaction()?.hash,
-        deployer: walletAddress,
+        deployer: wallet.address,
         constructorArgs,
       },
     };
