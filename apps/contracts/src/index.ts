@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { ethers } from 'ethers';
 import { IMCPTool, ReturnTypeStructuredContent } from '@stability-mcp/types';
 import { env } from '@stability-mcp/utils';
+import ContractCompiler from './compiler.js';
 
 const getProvider = (apiKey?: string) => {
   const key = apiKey || env('STABILITY_API_KEY');
@@ -9,45 +10,7 @@ const getProvider = (apiKey?: string) => {
   return new ethers.JsonRpcProvider(rpcUrl);
 };
 
-// Standard ERC20 contract bytecode and ABI (simplified version)
-const ERC20_BYTECODE =
-  '0x608060405234801561001057600080fd5b5060405161064d38038061064d8339818101604052604081101561003357600080fd5b81019080805160405193929190846401000000008211156100535760...';
-const ERC20_ABI = [
-  'constructor(string memory name, string memory symbol, uint256 initialSupply)',
-  'function name() public view returns (string)',
-  'function symbol() public view returns (string)',
-  'function decimals() public view returns (uint8)',
-  'function totalSupply() public view returns (uint256)',
-  'function balanceOf(address account) public view returns (uint256)',
-  'function transfer(address to, uint256 amount) public returns (bool)',
-  'event Transfer(address indexed from, address indexed to, uint256 value)',
-];
-
-// Standard ERC721 contract bytecode and ABI (simplified version)
-const ERC721_BYTECODE =
-  '0x608060405234801561001057600080fd5b5060405161082d38038061082d8339818101604052604081101561003357600080fd5b81019080805160405193929190846401000000008211156100535760...';
-const ERC721_ABI = [
-  'constructor(string memory name, string memory symbol)',
-  'function name() public view returns (string)',
-  'function symbol() public view returns (string)',
-  'function tokenURI(uint256 tokenId) public view returns (string)',
-  'function ownerOf(uint256 tokenId) public view returns (address)',
-  'function balanceOf(address owner) public view returns (uint256)',
-  'function mint(address to, uint256 tokenId) public',
-  'event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)',
-];
-
-// Standard ERC1155 contract bytecode and ABI (simplified version)
-const ERC1155_BYTECODE =
-  '0x608060405234801561001057600080fd5b5060405161064d38038061064d8339818101604052604081101561003357600080fd5b81019080805160405193929190846401000000008211156100535760...';
-const ERC1155_ABI = [
-  'constructor(string memory uri)',
-  'function uri(uint256) public view returns (string)',
-  'function balanceOf(address account, uint256 id) public view returns (uint256)',
-  'function balanceOfBatch(address[] accounts, uint256[] ids) public view returns (uint256[])',
-  'function mint(address to, uint256 id, uint256 amount, bytes data) public',
-  'event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)',
-];
+const compiler = ContractCompiler.getInstance();
 
 export const deployERC20Schema = z.object({
   name: z.string().describe('Token name'),
@@ -55,6 +18,11 @@ export const deployERC20Schema = z.object({
   initialSupply: z
     .string()
     .describe('Initial supply in tokens (will be converted to wei)'),
+  decimals: z
+    .number()
+    .optional()
+    .default(18)
+    .describe('Number of decimals for the token'),
   privateKey: z.string().describe('Private key of the deploying wallet'),
   apiKey: z
     .string()
@@ -70,24 +38,32 @@ export const deployERC20Tool: IMCPTool<
   description: 'Deploy an ERC20 token contract',
   inputSchema: deployERC20Schema,
   handler: async (args) => {
-    const { name, symbol, initialSupply, privateKey, apiKey } = args;
+    const {
+      name,
+      symbol,
+      initialSupply,
+      decimals = 18,
+      privateKey,
+      apiKey,
+    } = args;
     const provider = getProvider(apiKey);
 
     const wallet = new ethers.Wallet(privateKey, provider);
 
-    // Convert initial supply to wei (assuming 18 decimals)
-    const initialSupplyWei = ethers.parseUnits(initialSupply, 18);
+    // Get compiled contract
+    const compiled = await compiler.getERC20();
 
     const contractFactory = new ethers.ContractFactory(
-      ERC20_ABI,
-      ERC20_BYTECODE,
+      compiled.abi,
+      compiled.bytecode,
       wallet
     );
 
     const deployTx = await contractFactory.deploy(
       name,
       symbol,
-      initialSupplyWei,
+      initialSupply,
+      decimals,
       {
         maxFeePerGas: 0,
         maxPriorityFeePerGas: 0,
@@ -107,6 +83,7 @@ export const deployERC20Tool: IMCPTool<
             name,
             symbol,
             initialSupply,
+            decimals,
             deployer: wallet.address,
           }),
         },
@@ -117,6 +94,7 @@ export const deployERC20Tool: IMCPTool<
         name,
         symbol,
         initialSupply,
+        decimals,
         deployer: wallet.address,
       },
     };
@@ -127,6 +105,7 @@ export const deployERC20Tool: IMCPTool<
     name: z.string(),
     symbol: z.string(),
     initialSupply: z.string(),
+    decimals: z.number(),
     deployer: z.string(),
   }),
 };
@@ -134,6 +113,11 @@ export const deployERC20Tool: IMCPTool<
 export const deployERC721Schema = z.object({
   name: z.string().describe('NFT collection name'),
   symbol: z.string().describe('NFT collection symbol'),
+  baseTokenURI: z
+    .string()
+    .optional()
+    .default('')
+    .describe('Base URI for token metadata'),
   privateKey: z.string().describe('Private key of the deploying wallet'),
   apiKey: z
     .string()
@@ -149,18 +133,21 @@ export const deployERC721Tool: IMCPTool<
   description: 'Deploy an ERC721 NFT contract',
   inputSchema: deployERC721Schema,
   handler: async (args) => {
-    const { name, symbol, privateKey, apiKey } = args;
+    const { name, symbol, baseTokenURI = '', privateKey, apiKey } = args;
     const provider = getProvider(apiKey);
 
     const wallet = new ethers.Wallet(privateKey, provider);
 
+    // Get compiled contract
+    const compiled = await compiler.getERC721();
+
     const contractFactory = new ethers.ContractFactory(
-      ERC721_ABI,
-      ERC721_BYTECODE,
+      compiled.abi,
+      compiled.bytecode,
       wallet
     );
 
-    const deployTx = await contractFactory.deploy(name, symbol, {
+    const deployTx = await contractFactory.deploy(name, symbol, baseTokenURI, {
       maxFeePerGas: 0,
       maxPriorityFeePerGas: 0,
     });
@@ -177,6 +164,7 @@ export const deployERC721Tool: IMCPTool<
             transactionHash: deployTx.deploymentTransaction()?.hash,
             name,
             symbol,
+            baseTokenURI,
             deployer: wallet.address,
           }),
         },
@@ -186,6 +174,7 @@ export const deployERC721Tool: IMCPTool<
         transactionHash: deployTx.deploymentTransaction()?.hash,
         name,
         symbol,
+        baseTokenURI,
         deployer: wallet.address,
       },
     };
@@ -195,6 +184,7 @@ export const deployERC721Tool: IMCPTool<
     transactionHash: z.string().optional(),
     name: z.string(),
     symbol: z.string(),
+    baseTokenURI: z.string(),
     deployer: z.string(),
   }),
 };
@@ -221,9 +211,12 @@ export const deployERC1155Tool: IMCPTool<
 
     const wallet = new ethers.Wallet(privateKey, provider);
 
+    // Get compiled contract
+    const compiled = await compiler.getERC1155();
+
     const contractFactory = new ethers.ContractFactory(
-      ERC1155_ABI,
-      ERC1155_BYTECODE,
+      compiled.abi,
+      compiled.bytecode,
       wallet
     );
 

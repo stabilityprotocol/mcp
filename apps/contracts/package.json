@@ -7,12 +7,15 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc --build --force",
-    "start": "node dist/index.js"
+    "start": "node dist/index.js",
+    "compile": "node dist/compiler.js"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^5.1.0",
     "@stability-mcp/types": "workspace:*",
     "@stability-mcp/utils": "workspace:*",
     "ethers": "^6.13.4",
+    "solc": "^0.8.28",
     "zod": "^3.25.49"
   }
 }
