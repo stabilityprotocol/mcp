@@ -2,14 +2,13 @@
 
 A comprehensive Management Control Panel (MCP) for interacting with the STABILITY blockchain. This project provides tools for wallet management, smart contract deployment, and blockchain interactions.
 
+PRODUCTION URL: https://mcp.stabilityprotocol.com
+
 ## Features
 
 ### 🔐 Wallet Management
 
 - Create new random wallets
-- Import existing wallets (private key or mnemonic)
-- Delete managed wallets
-- List all wallets
 - Get wallet balances
 - Retrieve transaction history
 
@@ -108,9 +107,6 @@ The STABILITY API key can be provided in multiple ways:
 #### 1. Wallet Tools (`/mcp/wallet`)
 
 - `create_wallet` - Create a new random wallet
-- `import_wallet` - Import wallet via private key or mnemonic
-- `delete_wallet` - Remove wallet from management
-- `list_wallets` - List all managed wallets
 - `get_balance` - Get wallet balance
 - `get_transaction_history` - Get transaction history
 

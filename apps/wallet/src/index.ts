@@ -51,99 +51,6 @@ export const createWalletTool: IMCPTool<
   }),
 };
 
-export const importWalletSchema = z.object({
-  privateKey: z.string().optional().describe('Private key to import'),
-  mnemonic: z.string().optional().describe('Mnemonic phrase to import'),
-  alias: z.string().optional().describe('Optional alias for the wallet'),
-});
-
-export const importWalletTool: IMCPTool<
-  typeof importWalletSchema,
-  ReturnTypeStructuredContent
-> = {
-  name: 'import_wallet',
-  description: 'Import an existing wallet using private key or mnemonic',
-  inputSchema: importWalletSchema,
-  handler: async (args) => {
-    const { privateKey, mnemonic, alias } = args;
-
-    if (!privateKey && !mnemonic) {
-      throw new Error('Either privateKey or mnemonic must be provided');
-    }
-
-    let wallet: any;
-
-    if (privateKey) {
-      wallet = new ethers.Wallet(privateKey);
-    } else if (mnemonic) {
-      wallet = ethers.Wallet.fromPhrase(mnemonic);
-    } else {
-      throw new Error('Either privateKey or mnemonic must be provided');
-    }
-
-    const address = wallet.address;
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            address,
-            alias: alias || null,
-            imported: true,
-          }),
-        },
-      ],
-      structuredContent: {
-        address,
-        alias: alias || null,
-        imported: true,
-      },
-    };
-  },
-  outputSchema: z.object({
-    address: z.string(),
-    alias: z.string().nullable(),
-    imported: z.boolean(),
-  }),
-};
-
-export const deleteWalletSchema = z.object({
-  address: z.string().describe('Wallet address to delete'),
-});
-
-export const deleteWalletTool: IMCPTool<
-  typeof deleteWalletSchema,
-  ReturnTypeStructuredContent
-> = {
-  name: 'delete_wallet',
-  description: 'Delete a wallet from management',
-  inputSchema: deleteWalletSchema,
-  handler: async (args) => {
-    const { address } = args;
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            address,
-            deleted: true,
-          }),
-        },
-      ],
-      structuredContent: {
-        address,
-        deleted: true,
-      },
-    };
-  },
-  outputSchema: z.object({
-    address: z.string(),
-    deleted: z.boolean(),
-  }),
-};
-
 export const getBalanceSchema = z.object({
   address: z.string().describe('Wallet address to get balance for'),
 });
@@ -300,10 +207,4 @@ export const getTransactionHistoryTool: IMCPTool<
   }),
 };
 
-export default [
-  createWalletTool,
-  importWalletTool,
-  deleteWalletTool,
-  getBalanceTool,
-  getTransactionHistoryTool,
-];
+export default [createWalletTool, getBalanceTool, getTransactionHistoryTool];
