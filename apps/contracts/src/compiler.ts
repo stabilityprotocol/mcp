@@ -182,8 +182,8 @@ class ContractCompiler {
     const input = {
       language: 'Solidity',
       sources: allSources,
-      version: '0.8.24',
       settings: {
+        evmVersion: 'shanghai',
         outputSelection: {
           '*': {
             '*': ['abi', 'evm.bytecode', 'metadata'],
