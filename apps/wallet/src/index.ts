@@ -7,9 +7,7 @@ const getProvider = (apiKey?: string) => {
   return new ethers.JsonRpcProvider(rpcUrl);
 };
 
-export const createWalletSchema = z.object({
-  alias: z.string().optional().describe('Optional alias for the wallet'),
-});
+export const createWalletSchema = z.object({});
 
 export const createWalletTool: IMCPTool<
   typeof createWalletSchema,
@@ -19,7 +17,6 @@ export const createWalletTool: IMCPTool<
   description: 'Create a new random wallet',
   inputSchema: createWalletSchema,
   handler: async (args) => {
-    const { alias } = args;
     const wallet = ethers.Wallet.createRandom();
     const address = wallet.address;
 
@@ -29,7 +26,6 @@ export const createWalletTool: IMCPTool<
           type: 'text',
           text: JSON.stringify({
             address,
-            alias: alias || null,
             mnemonic: wallet.mnemonic?.phrase,
             privateKey: wallet.privateKey,
           }),
@@ -37,7 +33,6 @@ export const createWalletTool: IMCPTool<
       ],
       structuredContent: {
         address,
-        alias: alias || null,
         mnemonic: wallet.mnemonic?.phrase,
         privateKey: wallet.privateKey,
       },
@@ -45,7 +40,6 @@ export const createWalletTool: IMCPTool<
   },
   outputSchema: z.object({
     address: z.string(),
-    alias: z.string().nullable(),
     mnemonic: z.string().optional(),
     privateKey: z.string(),
   }),
