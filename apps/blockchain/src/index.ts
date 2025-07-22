@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { ethers } from 'ethers';
 import { IMCPTool, ReturnTypeStructuredContent } from '@stability-mcp/types';
 
-const getProvider = (apiKey: string) => {
+const getProvider = (apiKey?: string) => {
   const rpcUrl = `https://rpc.stabilityprotocol.com/zgt/${apiKey}`;
   return new ethers.JsonRpcProvider(rpcUrl);
 };
@@ -83,11 +83,7 @@ export const sendTransactionTool: IMCPTool<
 };
 
 export const getTransactionSchema = z.object({
-  apiKey: z
-    .string()
-    .describe(
-      'STABILITY API Key, get one from https://portal.stabilityprotocol.com'
-    ),
+  apiKey: z.string().optional().describe('STABILITY API Key (optional)'),
   transactionHash: z.string().describe('Transaction hash to query'),
 });
 
@@ -165,11 +161,7 @@ export const getTransactionTool: IMCPTool<
 };
 
 export const getBlockSchema = z.object({
-  apiKey: z
-    .string()
-    .describe(
-      'STABILITY API Key, get one from https://portal.stabilityprotocol.com'
-    ),
+  apiKey: z.string().optional().describe('STABILITY API Key (optional)'),
   blockNumber: z.number().describe('Block number to query'),
   includeTransactions: z
     .boolean()
@@ -239,11 +231,7 @@ export const getBlockTool: IMCPTool<
 };
 
 export const readContractSchema = z.object({
-  apiKey: z
-    .string()
-    .describe(
-      'STABILITY API Key, get one from https://portal.stabilityprotocol.com'
-    ),
+  apiKey: z.string().optional().describe('STABILITY API Key (optional)'),
   contractAddress: z.string().describe('Contract address to read from'),
   abi: z.array(z.string()).describe('Contract ABI'),
   functionName: z.string().describe('Function name to call'),
@@ -382,11 +370,7 @@ export const writeContractTool: IMCPTool<
 };
 
 export const getLatestBlockSchema = z.object({
-  apiKey: z
-    .string()
-    .describe(
-      'STABILITY API Key, get one from https://portal.stabilityprotocol.com'
-    ),
+  apiKey: z.string().optional().describe('STABILITY API Key (optional)'),
 });
 
 export const getLatestBlockTool: IMCPTool<

@@ -26,8 +26,9 @@ export const deployERC20Schema = z.object({
   privateKey: z.string().describe('Private key of the deploying wallet'),
   apiKey: z
     .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
+    .describe(
+      'STABILITY API Key, get one from https://portal.stabilityprotocol.com'
+    ),
 });
 
 export const deployERC20Tool: IMCPTool<
@@ -121,8 +122,9 @@ export const deployERC721Schema = z.object({
   privateKey: z.string().describe('Private key of the deploying wallet'),
   apiKey: z
     .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
+    .describe(
+      'STABILITY API Key, get one from https://portal.stabilityprotocol.com'
+    ),
 });
 
 export const deployERC721Tool: IMCPTool<
@@ -194,8 +196,9 @@ export const deployERC1155Schema = z.object({
   privateKey: z.string().describe('Private key of the deploying wallet'),
   apiKey: z
     .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
+    .describe(
+      'STABILITY API Key, get one from https://portal.stabilityprotocol.com'
+    ),
 });
 
 export const deployERC1155Tool: IMCPTool<
@@ -269,8 +272,9 @@ export const deployCustomContractSchema = z.object({
   privateKey: z.string().describe('Private key of the deploying wallet'),
   apiKey: z
     .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
+    .describe(
+      'STABILITY API Key, get one from https://portal.stabilityprotocol.com'
+    ),
 });
 
 export const deployCustomContractTool: IMCPTool<

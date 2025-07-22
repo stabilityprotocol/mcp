@@ -1,23 +1,14 @@
 import { z } from 'zod';
 import { ethers } from 'ethers';
 import { IMCPTool, ReturnTypeStructuredContent } from '@stability-mcp/types';
-import { env } from '@stability-mcp/utils';
-
-// In-memory wallet storage (in production, this should be encrypted and persistent)
-const wallets: Map<string, { wallet: any; alias?: string }> = new Map();
 
 const getProvider = (apiKey?: string) => {
-  const key = apiKey || env('STABILITY_API_KEY');
-  const rpcUrl = `https://rpc.stabilityprotocol.com/zgt/${key}`;
+  const rpcUrl = `https://rpc.stabilityprotocol.com/zgt/${apiKey}`;
   return new ethers.JsonRpcProvider(rpcUrl);
 };
 
 export const createWalletSchema = z.object({
   alias: z.string().optional().describe('Optional alias for the wallet'),
-  apiKey: z
-    .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
 });
 
 export const createWalletTool: IMCPTool<
@@ -28,11 +19,9 @@ export const createWalletTool: IMCPTool<
   description: 'Create a new random wallet',
   inputSchema: createWalletSchema,
   handler: async (args) => {
-    const { alias, apiKey } = args;
+    const { alias } = args;
     const wallet = ethers.Wallet.createRandom();
     const address = wallet.address;
-
-    wallets.set(address, { wallet, alias });
 
     return {
       content: [
@@ -66,10 +55,6 @@ export const importWalletSchema = z.object({
   privateKey: z.string().optional().describe('Private key to import'),
   mnemonic: z.string().optional().describe('Mnemonic phrase to import'),
   alias: z.string().optional().describe('Optional alias for the wallet'),
-  apiKey: z
-    .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
 });
 
 export const importWalletTool: IMCPTool<
@@ -97,7 +82,6 @@ export const importWalletTool: IMCPTool<
     }
 
     const address = wallet.address;
-    wallets.set(address, { wallet, alias });
 
     return {
       content: [
@@ -126,10 +110,6 @@ export const importWalletTool: IMCPTool<
 
 export const deleteWalletSchema = z.object({
   address: z.string().describe('Wallet address to delete'),
-  apiKey: z
-    .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
 });
 
 export const deleteWalletTool: IMCPTool<
@@ -141,12 +121,6 @@ export const deleteWalletTool: IMCPTool<
   inputSchema: deleteWalletSchema,
   handler: async (args) => {
     const { address } = args;
-
-    if (!wallets.has(address)) {
-      throw new Error(`Wallet ${address} not found`);
-    }
-
-    wallets.delete(address);
 
     return {
       content: [
@@ -170,56 +144,8 @@ export const deleteWalletTool: IMCPTool<
   }),
 };
 
-export const listWalletsSchema = z.object({
-  apiKey: z
-    .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
-});
-
-export const listWalletsTool: IMCPTool<
-  typeof listWalletsSchema,
-  ReturnTypeStructuredContent
-> = {
-  name: 'list_wallets',
-  description: 'List all managed wallets',
-  inputSchema: listWalletsSchema,
-  handler: async () => {
-    const walletList = Array.from(wallets.entries()).map(
-      ([address, { alias }]) => ({
-        address,
-        alias: alias || null,
-      })
-    );
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({ wallets: walletList }),
-        },
-      ],
-      structuredContent: {
-        wallets: walletList,
-      },
-    };
-  },
-  outputSchema: z.object({
-    wallets: z.array(
-      z.object({
-        address: z.string(),
-        alias: z.string().nullable(),
-      })
-    ),
-  }),
-};
-
 export const getBalanceSchema = z.object({
   address: z.string().describe('Wallet address to get balance for'),
-  apiKey: z
-    .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
 });
 
 export const getBalanceTool: IMCPTool<
@@ -230,8 +156,8 @@ export const getBalanceTool: IMCPTool<
   description: 'Get the balance of a wallet',
   inputSchema: getBalanceSchema,
   handler: async (args) => {
-    const { address, apiKey } = args;
-    const provider = getProvider(apiKey);
+    const { address } = args;
+    const provider = getProvider();
 
     const balanceWei = await provider.getBalance(address);
     const balanceEth = ethers.formatEther(balanceWei);
@@ -265,10 +191,6 @@ export const getTransactionHistorySchema = z.object({
   address: z.string().describe('Wallet address to get transaction history for'),
   fromBlock: z.number().optional().describe('Starting block number'),
   toBlock: z.number().optional().describe('Ending block number'),
-  apiKey: z
-    .string()
-    .optional()
-    .describe('STABILITY API Key (optional if set as environment variable)'),
 });
 
 export const getTransactionHistoryTool: IMCPTool<
@@ -279,8 +201,8 @@ export const getTransactionHistoryTool: IMCPTool<
   description: 'Get transaction history for a wallet',
   inputSchema: getTransactionHistorySchema,
   handler: async (args) => {
-    const { address, fromBlock = 0, toBlock, apiKey } = args;
-    const provider = getProvider(apiKey);
+    const { address, fromBlock = 0, toBlock } = args;
+    const provider = getProvider();
 
     try {
       // Get latest block if toBlock not specified
@@ -382,7 +304,6 @@ export default [
   createWalletTool,
   importWalletTool,
   deleteWalletTool,
-  listWalletsTool,
   getBalanceTool,
   getTransactionHistoryTool,
 ];
