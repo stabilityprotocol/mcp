@@ -4,8 +4,8 @@ import { IMCPTool, ReturnTypeStructuredContent } from '@stability-mcp/types';
 import { env } from '@stability-mcp/utils';
 import ContractCompiler from './compiler.js';
 
-const getProvider = (apiKey?: string) => {
-  const key = apiKey || env('STABILITY_API_KEY');
+const getProvider = (apiKey: string) => {
+  const key = apiKey;
   const rpcUrl = `https://rpc.stabilityprotocol.com/zgt/${key}`;
   return new ethers.JsonRpcProvider(rpcUrl);
 };

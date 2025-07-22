@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 import { IMCPTool, ReturnTypeStructuredContent } from '@stability-mcp/types';
 
 const getProvider = (apiKey?: string) => {
-  const rpcUrl = `https://rpc.stabilityprotocol.com/zgt/${apiKey}`;
+  const rpcUrl = `https://rpc.stabilityprotocol.com/zgt/${apiKey ?? ''}`;
   return new ethers.JsonRpcProvider(rpcUrl);
 };
 
